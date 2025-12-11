@@ -20,14 +20,14 @@ pipeline {
 
     stages {
 
-        stage('init') {
+        stage('1.init') {
             steps {
                 echo 'init stage'
                 deleteDir()
             }
         }
 
-        stage('Cloning Repository') {
+        stage('2.Cloning Repository') {
             steps {
                 echo 'Cloning Repository'
                 git branch: "${GIT_TARGET_BRANCH}",
@@ -35,7 +35,18 @@ pipeline {
                     url: "${GIT_REPOSITORY_URL}"
             }
         }
-
+        
+        stage('3.Build Docker Image') {
+            steps {
+                script {
+                    sh '''
+                        docker build -t ${AWS_ECR_URI}/${AWS_ECR_IMAGE_NAME}:${BUILD_NUMBER} ./svelte
+                        docker build -t ${AWS_ECR_URI}/${AWS_ECR_IMAGE_NAME}:latest ./svelte
+                    '''
+                }
+                // 명령어가 많아질것같아서 스크립트 블록을 추가.
+            }
+        }
 
     }
 }
